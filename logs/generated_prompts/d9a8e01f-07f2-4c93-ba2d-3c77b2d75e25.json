@@ -1,0 +1,3 @@
+{
+  "mathematics": "Consider a ladder of length L initially positioned vertically against a wall. The ladder is then displaced such that:\n- The bottom end slides along the ground (horizontal x-axis)\n- The top end slides down the wall (vertical y-axis)\n- The ladder maintains its full length at all times\n\nAs the ladder slides down, it occupies different positions. Describe mathematically the envelope curve formed by all possible positions of this ladder. What is the equation of this envelope? What type of curve is it?\n\nPlease provide a clear derivation and interpretation of the result."
+}

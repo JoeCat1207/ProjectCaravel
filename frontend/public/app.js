@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Define the backend API base URL
+    const API_BASE = 'http://localhost:8000';
+    
     const promptInput = document.getElementById('prompt-input');
     const submitButton = document.getElementById('submit-prompt');
     const resultsContainer = document.getElementById('results');
@@ -8,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const codingOutput = document.getElementById('coding-output');
     const literatureOutput = document.getElementById('literature-output');
     const combinedOutput = document.getElementById('combined-output');
+
     
     // Poll status interval in milliseconds
     const POLL_INTERVAL = 1000;
@@ -40,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             // Submit prompt
-            const response = await fetch('/api/prompt', {
+            const response = await fetch(`${API_BASE}/api/prompt`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -69,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentSessionId) return;
         
         try {
-            const response = await fetch(`/api/status/${currentSessionId}`);
+            const response = await fetch(`${API_BASE}/api/status/${currentSessionId}`);
             const data = await response.json();
             
             updateUI(data);
