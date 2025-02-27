@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Courser</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Courser</h1>
+            <p>Multi-LLM Aggregator System</p>
+        </header>
+        
+        <main>
+            <div class="prompt-container">
+                <textarea id="prompt-input" placeholder="Enter your prompt here..."></textarea>
+                <button id="submit-prompt">Submit Prompt</button>
+            </div>
+            
+            <div id="results" class="hidden">
+                <div class="processing-step">
+                    <h2>Deepseek R1 Parsing</h2>
+                    <div id="parsing-output" class="output-box"></div>
+                </div>
+                
+                <div class="llm-responses">
+                    <div class="llm-response">
+                        <h3>General Knowledge</h3>
+                        <div id="general-output" class="output-box"></div>
+                    </div>
+                    
+                    <div class="llm-response">
+                        <h3>Mathematics (Gemini 2.0 Flash)</h3>
+                        <div id="math-output" class="output-box"></div>
+                    </div>
+                    
+                    <div class="llm-response">
+                        <h3>Coding (Claude 3.7 Sonnet)</h3>
+                        <div id="coding-output" class="output-box"></div>
+                    </div>
+                    
+                    <div class="llm-response">
+                        <h3>Literature (Claude 3.5 Sonnet)</h3>
+                        <div id="literature-output" class="output-box"></div>
+                    </div>
+                </div>
+                
+                <div class="combined-response">
+                    <h2>Combined Response</h2>
+                    <div id="combined-output" class="output-box"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

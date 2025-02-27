@@ -1,0 +1,12 @@
+{
+  "name": "project-courser-frontend",
+  "version": "1.0.0",
+  "description": "Web interface for Project Courser LLM Aggregator",
+  "main": "index.js",
+  "scripts": {
+    "start": "serve -s public"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
