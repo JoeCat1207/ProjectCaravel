@@ -7,27 +7,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"  # Backend API
-      - "3000:3000"  # Frontend
-    depends_on:
-      - ollama
+      - "3001:3000"  # Frontend (adjusted to avoid port conflict)
     volumes:
       - ./logs:/app/logs
       - ./backend/api_keys.env:/app/backend/api_keys.env
     networks:
       - courser-network
 
-  ollama:
-    image: ollama/ollama:latest
-    volumes:
-      - ollama-data:/root/.ollama
-    ports:
-      - "11434:11434"
-    command: serve
-    networks:
-      - courser-network
-
 volumes:
-  ollama-data:
+  app-data:
 
 networks:
   courser-network:

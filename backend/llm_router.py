@@ -1,8 +1,6 @@
 import aiohttp
-import os
 import json
-from typing import Dict
-import time
+from typing import Dict, List, Optional
 from config import API_KEYS
 
 async def route_to_llms(generated_prompts: Dict[str, str]) -> Dict[str, str]:
@@ -28,7 +26,7 @@ async def route_to_llms(generated_prompts: Dict[str, str]) -> Dict[str, str]:
             elif category == "literature":
                 task = process_literature_with_claude_35(prompt)
             elif category == "general_knowledge":
-                task = process_general_with_deepseek(prompt)
+                task = process_general_with_claude_37(prompt)
             else:
                 continue
                 
@@ -40,25 +38,12 @@ async def route_to_llms(generated_prompts: Dict[str, str]) -> Dict[str, str]:
     
     return responses
 
-async def call_deepseek_ollama(system_prompt: str, prompt: str) -> str:
-    """Call the local Ollama instance running Deepseek R1 14B."""
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            "http://ollama:11434/api/generate",
-            json={
-                "model": "deepseek-r1:14b",
-                "prompt": prompt,
-                "system": system_prompt,
-                "stream": False
-            }
-        ) as response:
-            result = await response.json()
-            
-    return result.get("response", "")
-
-async def process_general_with_deepseek(prompt: str) -> str:
-    """Process general knowledge queries with Deepseek R1 14B."""
-    return await call_deepseek_ollama("You are a helpful assistant answering general knowledge questions.", prompt)
+async def process_general_with_claude_37(prompt: str) -> str:
+    """Process general knowledge queries with Claude 3.7 Sonnet."""
+    return await call_claude_37(
+        "You are a helpful assistant addressing general knowledge questions.",
+        prompt
+    )
 
 async def process_math_with_gemini(prompt: str) -> str:
     """Process math queries with Gemini 2.0 Flash."""
@@ -91,31 +76,10 @@ async def process_math_with_gemini(prompt: str) -> str:
 
 async def process_coding_with_claude_37(prompt: str) -> str:
     """Process coding queries with Claude 3.7 Sonnet."""
-    api_key = API_KEYS["claude"]
-    
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json"
-            },
-            json={
-                "model": "claude-3-7-sonnet-20250219",
-                "max_tokens": 4096,
-                "messages": [
-                    {"role": "user", "content": prompt}
-                ]
-            }
-        ) as response:
-            result = await response.json()
-    
-    # Extract the response from Claude API response
-    try:
-        return result["content"][0]["text"]
-    except (KeyError, IndexError):
-        return f"Error processing coding with Claude 3.7: {json.dumps(result)}"
+    return await call_claude_37(
+        "You are a helpful programming assistant that explains code clearly and provides well-structured, efficient solutions.",
+        prompt
+    )
 
 async def process_literature_with_claude_35(prompt: str) -> str:
     """Process literature/reading comprehension with Claude 3.5 Sonnet."""
@@ -132,6 +96,7 @@ async def process_literature_with_claude_35(prompt: str) -> str:
             json={
                 "model": "claude-3-5-sonnet-20240229",
                 "max_tokens": 4096,
+                "system": "You are a literary analysis and reading comprehension expert who provides insightful, nuanced interpretations.",
                 "messages": [
                     {"role": "user", "content": prompt}
                 ]
@@ -144,3 +109,64 @@ async def process_literature_with_claude_35(prompt: str) -> str:
         return result["content"][0]["text"]
     except (KeyError, IndexError):
         return f"Error processing literature with Claude 3.5: {json.dumps(result)}"
+
+async def call_claude_37(system_prompt: str, prompt: str) -> str:
+    """Call Claude 3.7 Sonnet API with the given system prompt and user prompt."""
+    api_key = API_KEYS["claude"]
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            },
+            json={
+                "model": "claude-3-7-sonnet-20250219",
+                "max_tokens": 4096,
+                "system": system_prompt,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ]
+            }
+        ) as response:
+            result = await response.json()
+    
+    # Extract the response
+    try:
+        return result["content"][0]["text"]
+    except (KeyError, IndexError):
+        return f"Error processing with Claude 3.7: {json.dumps(result)}"
+
+async def generate_structured_prompt(category: str, content: str) -> str:
+    """
+    Generate an optimized prompt for a specific category using Claude 3.7 Sonnet.
+    
+    Arguments:
+        category: The category of the content
+        content: The raw content to structure
+        
+    Returns:
+        A structured prompt optimized for the target LLM
+    """
+    category_descriptions = {
+        "general_knowledge": "general knowledge questions",
+        "mathematics": "mathematical problems or equations",
+        "coding": "programming tasks or code explanations",
+        "literature": "literary analysis or reading comprehension"
+    }
+    
+    system_prompt = f"""You are an expert at creating structured prompts for AI language models.
+    Take the provided content related to {category_descriptions.get(category, "a specific topic")} and create
+    a clear, well-structured prompt that will help another AI model provide the best possible response.
+    
+    Focus on:
+    1. Clarifying any ambiguities in the original content
+    2. Organizing the information logically
+    3. Highlighting key questions or requirements
+    4. Providing necessary context
+    
+    Your output should be just the reformulated prompt with no additional explanations or meta-commentary."""
+    
+    return await call_claude_37(system_prompt, content)

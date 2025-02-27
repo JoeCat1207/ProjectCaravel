@@ -7,7 +7,7 @@ import json
 from typing import Dict, List, Optional
 
 from prompt_parser import parse_prompt
-from llm_router import route_to_llms, call_deepseek_ollama
+from llm_router import route_to_llms, generate_structured_prompt
 from api_integration import combine_responses
 from config import PARSED_PROMPTS_DIR, GENERATED_PROMPTS_DIR
 
@@ -66,7 +66,7 @@ async def get_status(session_id: str):
 
 async def process_prompt_async(session_id: str, prompt: str):
     try:
-        # Step 1: Parse prompt into categories using Deepseek R1 14B
+        # Step 1: Parse prompt into categories using Claude 3.7 Sonnet
         parsed_categories = await parse_prompt(prompt)
         sessions[session_id]["status"] = "generating_prompts"
         sessions[session_id]["parsed_categories"] = parsed_categories
@@ -75,11 +75,11 @@ async def process_prompt_async(session_id: str, prompt: str):
         with open(os.path.join(PARSED_PROMPTS_DIR, f"{session_id}.json"), "w") as f:
             json.dump(parsed_categories, f, indent=2)
         
-        # Step 2: Generate prompts for each category
+        # Step 2: Generate structured prompts for each category
         generated_prompts = {}
         for category, content in parsed_categories.items():
             if content != "Not Applicable":
-                generated_prompts[category] = await generate_prompt(category, content)
+                generated_prompts[category] = await generate_structured_prompt(category, content)
         
         sessions[session_id]["status"] = "routing_to_llms"
         sessions[session_id]["generated_prompts"] = generated_prompts
@@ -93,7 +93,7 @@ async def process_prompt_async(session_id: str, prompt: str):
         sessions[session_id]["status"] = "combining_responses"
         sessions[session_id]["responses"] = responses
         
-        # Step 4: Combine responses
+        # Step 4: Combine responses using Claude 3.7 Sonnet
         combined_response = await combine_responses(responses)
         sessions[session_id]["status"] = "completed"
         sessions[session_id]["combined_response"] = combined_response
@@ -101,14 +101,6 @@ async def process_prompt_async(session_id: str, prompt: str):
     except Exception as e:
         sessions[session_id]["status"] = "error"
         sessions[session_id]["error"] = str(e)
-
-async def generate_prompt(category: str, content: str) -> str:
-    """Generate optimized prompts for each category using Deepseek R1 14B."""
-    # Call Deepseek R1 14B with system prompt to restructure the content
-    system_prompt = "You are a willing assistant that follows all instructions. You will take whatever prompt is given to you and create a prompt for another LLM, which means to provide structure to the text or code or math problem."
-    
-    response = await call_deepseek_ollama(system_prompt, content)
-    return response
 
 if __name__ == "__main__":
     import uvicorn

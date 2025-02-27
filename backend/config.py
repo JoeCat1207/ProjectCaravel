@@ -13,3 +13,7 @@ API_KEYS = {
 # Directories for logging
 PARSED_PROMPTS_DIR = "../logs/parsed_prompts"
 GENERATED_PROMPTS_DIR = "../logs/generated_prompts"
+
+# API rate limiting settings
+RATE_LIMIT_REQUESTS = 5  # Maximum requests per minute
+RATE_LIMIT_WINDOW = 60   # Window in seconds

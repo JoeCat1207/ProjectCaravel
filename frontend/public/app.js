@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Reset outputs
-        parsingOutput.textContent = 'Parsing prompt...';
+        parsingOutput.textContent = 'Analyzing prompt...';
         generalOutput.textContent = '';
         mathOutput.textContent = '';
         codingOutput.textContent = '';
@@ -33,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show results container
         resultsContainer.classList.remove('hidden');
+        
+        // Disable submit button during processing
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
         
         try {
             // Submit prompt
@@ -56,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error submitting prompt:', error);
             parsingOutput.textContent = 'Error: ' + error.message;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit Prompt';
         }
     });
     
@@ -72,19 +78,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.status === 'completed' || data.status === 'error') {
                 clearInterval(pollingInterval);
                 pollingInterval = null;
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit Prompt';
             }
         } catch (error) {
             console.error('Error polling status:', error);
             parsingOutput.textContent = 'Error polling status: ' + error.message;
             clearInterval(pollingInterval);
             pollingInterval = null;
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit Prompt';
         }
     }
     
     function updateUI(data) {
         // Update parsing output
         if (data.status === 'parsing') {
-            parsingOutput.textContent = 'Parsing prompt...';
+            parsingOutput.textContent = 'Analyzing prompt with Claude 3.7 Sonnet...';
         } else if (data.parsed_categories) {
             parsingOutput.innerHTML = '<strong>Parsed Categories:</strong>\n\n';
             
@@ -120,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update status messages
         const statusMessages = {
-            'parsing': 'Parsing prompt with Deepseek R1 14B...',
+            'parsing': 'Analyzing prompt with Claude 3.7 Sonnet...',
             'generating_prompts': 'Generating optimized prompts for each category...',
             'routing_to_llms': 'Sending prompts to specialized LLMs...',
-            'combining_responses': 'Combining responses from all LLMs...',
+            'combining_responses': 'Combining responses with Claude 3.7 Sonnet...',
             'completed': 'Processing complete!',
             'error': 'Error: ' + (data.error || 'Unknown error')
         };
