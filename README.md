@@ -34,9 +34,9 @@ ANTHROPIC_API_KEY= your key
 
 #below are optional controls for whatever you need
 #directories for logging
-# PARSED_PROMPTS_DIR=./logs/parsed_prompts
-# GENERATED_PROMPTS_DIR=./logs/generated_prompts
+#PARSED_PROMPTS_DIR=./logs/parsed_prompts
+#GENERATED_PROMPTS_DIR=./logs/generated_prompts
 
-#Rate limiting settings in case i run out of credits lol
-# RATE_LIMIT_REQUESTS=5
-# RATE_LIMIT_WINDOW=60
+#Rate limiting settings in case I run out of credits lol
+#RATE_LIMIT_REQUESTS=5
+#RATE_LIMIT_WINDOW=60
